@@ -2,14 +2,16 @@
 
   - [Quick start](quickstart.md)
 
-- Vayyar Producer
+- Producers
 
-  - [Introduction](vayyar.md)
+  - [Vayyar](producers/vayyar.md)
+  - [WideFind](producers/widefind.md)
+  - [Z-Wave](producers/zwave.md)
+  - [Simulator](producers/simulator.md)
 
-- WideFind Producer
+- Consumers
 
-  - [Introduction](widefind.md)
+  - [Web app](consumers/node.md)
 
 - Z-Wave Producer
 
-  - [Introduction](zwave.md)
