@@ -68,15 +68,15 @@ password = "my_password"
 host = "my_host"
 
 [vayyar]
-enabled = True
+enabled = true
 queue = "name_of_vayyar_queue" # Name of RMQ queue
 
 [widefind]
-enabled = False
+enabled = false
 queue = "name_of_widefind_queue"
 
 [zwave]
-enabled = True
+enabled = true
 queue = "name_of_zwave_queue"
 ```
 
