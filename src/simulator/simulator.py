@@ -2,10 +2,15 @@ import asyncio
 import aio_pika
 import toml
 import random
-from aiologger import Logger
+import logging
+import sys
 
-LOGGER = Logger.with_default_handlers(name='sim-logger')
-config = toml.load("config.toml")
+logger = logging.getLogger(__name__)
+out_handler = logging.StreamHandler(sys.stdout)
+out_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+out_handler.setLevel(logging.INFO)
+logger.addHandler(out_handler)
+logger.setLevel(logging.INFO)
 
 class Simulator:
     def __init__(self, config, loop):
@@ -19,31 +24,31 @@ class Simulator:
 
 
     async def _create_connection(self):
-        await LOGGER.info("Creating connection")
+        logger.info("Creating connection")
         return await aio_pika.connect_robust(
                 "amqp://{}:{}@{}/{}".format(
-                    config['rabbitmq']['username'],
-                    config['rabbitmq']['password'],
-                    config['rabbitmq']['host'],
-                    config['rabbitmq']['username']),
+                    self.config['rabbitmq']['username'],
+                    self.config['rabbitmq']['password'],
+                    self.config['rabbitmq']['host'],
+                    self.config['rabbitmq']['username']),
                 loop=self.loop)
     
 
     async def connect(self):
-        await LOGGER.info("Connecting to RMQ")
+        logger.info("Connecting to RMQ")
         self._connection = await self._create_connection()
         self._channel = await self._connection.channel()
 
 
     async def disconnect(self):
-        await LOGGER.info("Closing connection to RMQ")
+        logger.info("Closing connection to RMQ")
         await self._connection.close()
         self._connection = None
         self._channel = None
         self._running = False
 
     async def send_message(self, msg, routing_key): 
-        await LOGGER.debug("Sending message to {}: {}".format(routing_key, msg))
+        logger.info("Sending message to {}: {}".format(routing_key, msg))
         await self._channel.default_exchange.publish(
                 aio_pika.Message(
                     body=msg.encode()
@@ -56,14 +61,14 @@ class Simulator:
                 await self.send_message(msg, routing_key)
                 await asyncio.sleep(freq+random.uniform(-rand_var,rand_var))
         except asyncio.CancelledError:
-            await LOGGER.info("{} sender was stopped".format(msg))
+            logger.info("{} sender was stopped".format(msg))
 
     def run_simulation(self, freq=5):
         if self._connection == None:
-           LOGGER.info("Can't start simulation, simulator not connected to RMQ") 
+           logger.info("Can't start simulation, simulator not connected to RMQ") 
            return
         if self._running:
-            LOGGER.info("Simulator already running")
+            logger.info("Simulator already running")
             return
         self._running = True
 
@@ -78,7 +83,7 @@ class Simulator:
                                         self.config['vayyar']['queue'], freq)
                     )
             )
-            LOGGER.info("Starting vayyar task")
+            logger.info("Starting vayyar task")
 
         if widefind:
             self._sim_tasks.append(
@@ -87,7 +92,7 @@ class Simulator:
                                         self.config['widefind']['queue'], freq)
                     )
             )
-            LOGGER.info("Starting widefind task")
+            logger.info("Starting widefind task")
 
         if zwave:
             self._sim_tasks.append(
@@ -96,7 +101,7 @@ class Simulator:
                                         self.config['zwave']['queue'], freq)
                     )
             )
-            LOGGER.info("Starting zwave task")
+            logger.info("Starting zwave task")
 
 
     def stop_simulation(self):
@@ -105,7 +110,7 @@ class Simulator:
                 task.cancel()
             self._running = False
         else:
-            LOGGER.info("Tried to stop simulation that was not running")
+            logger.info("Tried to stop simulation that was not running")
 
     
 async def main(loop):

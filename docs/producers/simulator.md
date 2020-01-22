@@ -11,7 +11,7 @@ from actual sensor data.
 This module simulates sensor data and sends it to the RabbitMQ server. It is
 designed to ease the development and testing of consumer modules. The simulator
 is designed to be modular and highly configurable. Just as the other modules the
-simulator is also fully `asyncio` based. The simulator uses the `aiologger`
+simulator is also fully `asyncio` based. The simulator uses the default
 library for logging.
 
 ## Starting the simulator
