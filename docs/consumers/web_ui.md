@@ -9,8 +9,16 @@ The Node.js backend provides a websocket server which the front-end is
 connected to. The backend is connected to the RabbitMQ server and broadcasts
 incoming messages over the websocket in real-time to all connected clients.
 
+## Configuration
+Place a file named `config.toml` in the same directory as `server.js` with the
+following information.
 
-
+```toml
+[rabbitmq]
+username = "my_username"
+password = "my_password"
+host = "my_host"
+```
 
 
 ## Future improvements

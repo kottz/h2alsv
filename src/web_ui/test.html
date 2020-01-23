@@ -1,0 +1,18 @@
+<html>
+<body>
+	<p id="p">hej</p> 
+	<button onclick="send()">hej</button>
+</body>
+	<script>
+	var ws = new WebSocket("ws://localhost:3030/")
+	
+	var send = function() {
+		ws.send('hej');
+	}
+	var update = function(event) {
+		let p = document.getElementById("p");
+		p.innerHTML = event.data
+	}
+	ws.addEventListener('message', update, false)
+	</script>
+</html>
