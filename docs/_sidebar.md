@@ -1,6 +1,6 @@
 - Getting started
 
-  - [Quick start](quickstart.md)
+  - [Introduction](general/introduction.md)
 
 - Producers
 
@@ -11,7 +11,7 @@
 
 - Consumers
 
-  - [Web app](consumers/node.md)
+  - [Web app](consumers/web_ui.md)
 
 - Z-Wave Producer
 
