@@ -58,7 +58,7 @@ class Simulator:
     async def send_forever(self, msg, routing_key, freq=5, rand_var=1):
         try:
             while True:
-                await self.send_message(msg, routing_key)
+                await self.send_message(msg+' '+str(random.randint(1,100)), routing_key)
                 await asyncio.sleep(freq+random.uniform(-rand_var,rand_var))
         except asyncio.CancelledError:
             logger.info("{} sender was stopped".format(msg))
