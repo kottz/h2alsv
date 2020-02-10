@@ -4,6 +4,8 @@ import toml
 import random
 import logging
 import sys
+import json
+import datetime
 
 logger = logging.getLogger(__name__)
 out_handler = logging.StreamHandler(sys.stdout)
@@ -55,10 +57,13 @@ class Simulator:
                     ),
                 routing_key=routing_key)
 
-    async def send_forever(self, msg, routing_key, freq=5, rand_var=1):
+   
+
+    async def send_forever(self, msg_func, routing_key, freq=5, rand_var=1):
         try:
             while True:
-                await self.send_message(msg+' '+str(random.randint(1,100)), routing_key)
+                msg = msg_func()
+                await self.send_message(msg, routing_key)
                 await asyncio.sleep(freq+random.uniform(-rand_var,rand_var))
         except asyncio.CancelledError:
             logger.info("{} sender was stopped".format(msg))
@@ -79,7 +84,7 @@ class Simulator:
         if vayyar:
             self._sim_tasks.append(
                     asyncio.create_task(
-                        self.send_forever('vayyar msg',
+                        self.send_forever(self.get_vayyar_data,
                                         self.config['vayyar']['queue'], freq)
                     )
             )
@@ -88,7 +93,7 @@ class Simulator:
         if widefind:
             self._sim_tasks.append(
                     asyncio.create_task(
-                        self.send_forever('widefind msg',
+                        self.send_forever(self.get_widefind_data,
                                         self.config['widefind']['queue'], freq)
                     )
             )
@@ -97,7 +102,7 @@ class Simulator:
         if zwave:
             self._sim_tasks.append(
                     asyncio.create_task(
-                        self.send_forever('zwave msg',
+                        self.send_forever(self.get_zwave_data,
                                         self.config['zwave']['queue'], freq)
                     )
             )
@@ -112,10 +117,57 @@ class Simulator:
         else:
             logger.info("Tried to stop simulation that was not running")
 
+    def get_vayyar_data(self):
+        cur_time = datetime.datetime.now().time()
+        pos_vec = ["Standing", "Sitting", "Walking"]
+        json_msg = {
+            "time": str(cur_time),
+            "sensor_type": "vayyar",
+            "data": {
+                "posture_vector": random.choice(pos_vec),
+                "x_coordinate": random.randint(1,30),
+                "y_coordinate": random.randint(1,30),
+                "z_coordinate": random.randint(1,30),
+            }
+        }
+        return json.dumps(json_msg)
+
+    def get_widefind_data(self):
+        cur_time = datetime.datetime.now().time()
+        json_msg = {
+            "time": str(cur_time),
+            "sensor_type": "widefind",
+            "data": {
+                "x_coordinate": random.randint(1,30),
+                "y_coordinate": random.randint(1,30),
+                "z_coordinate": random.randint(1,30),
+            }
+        }
+        return json.dumps(json_msg)
+
+    def get_zwave_data(self):
+        cur_time = datetime.datetime.now().time()
+        json_msg = {
+            "time": str(cur_time),
+            "sensor_type": "zwave",
+            "data": {
+                "cabinet_1": bool(random.getrandbits(1)),
+                "cabinet_2": bool(random.getrandbits(1)),
+                "cabinet_3": bool(random.getrandbits(1)),
+                "cabinet_4": bool(random.getrandbits(1)),
+                "cabinet_5": bool(random.getrandbits(1)),
+                "cabinet_6": bool(random.getrandbits(1)),
+                "cabinet_7": bool(random.getrandbits(1)),
+            }
+        }
+        return json.dumps(json_msg)
+
     
 async def main(loop):
     config = toml.load('config.toml') 
     sim = Simulator(config, loop)
+    sim.get_vayyar_data()
+    #await asyncio.sleep(20)
     await sim.connect()
     sim.run_simulation()
     await asyncio.sleep(20) #Running for 20 sec just to test

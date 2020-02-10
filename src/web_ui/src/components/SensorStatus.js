@@ -8,7 +8,7 @@ export class SensorStatus extends React.Component {
     render() {
         return (
             <div className="sensor">
-                <h1>Sensor Status placeholder</h1>
+                <h1>Sensor Status</h1>
                 <h2>{this.props.data}</h2>
             </div>
         );

@@ -8,8 +8,12 @@ export class Widefind extends React.Component {
     render() {
         return (
             <div className="sensor">
-                <h1>Widefind placeholder</h1>
-                <h2>{this.props.data}</h2>
+                <h1>WideFind</h1>
+                <pre className="sensor-data">
+                    <code>
+                        { this.props.data }
+                    </code>
+                </pre>
             </div>
         );
     }

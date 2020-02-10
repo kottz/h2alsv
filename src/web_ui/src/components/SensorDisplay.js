@@ -8,16 +8,16 @@ import './SensorDisplay.css';
 export class SensorDisplay extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {vayyar: "My Vayyar Data",
-            widefind: "My Widefind Data",
-            zwave: "My Zwave Data",
-            status: "My status Data", 
+        this.state = {vayyar: "",
+            widefind: "",
+            zwave: "",
+            status: "", 
         };
         this.ws = new WebSocket('ws://localhost:3030/');
 
         this.ws.onmessage = msg => {
-            this.setState({vayyar: msg.data});
-            console.log(msg);
+            const json_msg = JSON.parse(msg.data);
+            this.setState({[json_msg.sensor_type]: JSON.stringify(json_msg, null, 2)});
         }
     }
     render() {

@@ -8,8 +8,12 @@ export class Zwave extends React.Component {
     render() {
         return (
             <div className="sensor">
-                <h1>Zwave placeholder</h1>
-                <h2>{this.props.data}</h2>
+                <h1>Z-Wave</h1>
+                <pre className="sensor-data">
+                    <code>
+                        { this.props.data }
+                    </code>
+                </pre>
             </div>
         );
     }

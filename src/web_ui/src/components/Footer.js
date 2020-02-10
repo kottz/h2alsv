@@ -5,7 +5,7 @@ export class Footer extends React.Component {
     render() {
         return (
             <div className="App-footer">
-                <h1>Footer tack för att ni kom</h1>
+                <p>Utvecklad med kärlek av grupp 1 | <a href="https://github.com/kottz/h2alsv">Github</a> | <a href="https://h2alsv.se">Docs</a></p>
             </div>
         );
     }

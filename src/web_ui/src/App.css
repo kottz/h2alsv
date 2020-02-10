@@ -12,6 +12,8 @@
   grid-gap: 10px;
 
   height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .App-logo {
@@ -26,9 +28,9 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #f5f9fa;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #333;
   grid-area: header;
 }
 
