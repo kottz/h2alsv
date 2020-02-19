@@ -44,6 +44,7 @@ def to_message(buffer):
             dims) if ndims else np.asscalar(data)
     return msg
 
+
 listener = create_connection("ws://"+config["connection"]["ip"])
 # retrieve current configuration
 listener.send(json.dumps({'Type': 'COMMAND',         'ID': 'SET_PARAMS',         'Payload': {'Cfg.MonitoredRoomDims': config["vayyar"]["rd"], 'Cfg.Common.sensorOrientation.mountPlane': config["vayyar"]["mp"],  'Cfg.Common.sensorOrientation.transVec': config["vayyar"]["tv"], 'Cfg.imgProcessing.substractionMode': config["vayyar"]["ips"], 'Cfg.TargetProperties.MaxPersonsInArena': config["vayyar"]["maxpia"],   'Cfg.TargetProperties.StandingMaxHeight': config["vayyar"]["stamaxh"],  'Cfg.TargetProperties.StandingMinHeight': config["vayyar"]["staminh"],             'Cfg.TargetProperties.SittingMinHeight': config["vayyar"]["lyiminh"],             'Cfg.TargetProperties.LyingMinHeight': config[
@@ -66,7 +67,9 @@ async def send_data():
         "amqp://"+config['rabbitmq']['username']+":"+config['rabbitmq']['password']+"@"+config['rabbitmq']['host']+"/"+config['rabbitmq']['username'], loop=loop
     )
     channel = await connection.channel()
-    routing_key = config['rabbitmq']['routing_key']
+    sensor_exchange = await channel.declare_exchange(
+        config['connection']['sensor_exchange'], aio_pika.ExchangeType.FANOUT, durable=True,
+    )
 
     while True:
         await asyncio.sleep(config["asynctimer"]["aast"])
@@ -80,12 +83,10 @@ async def send_data():
             # print(strftime("%H:%M:%S", localtime()))
             print("PostureVector: ", data['Payload']['PostureVector'][0])
             msg = "PostureVector: "+data['Payload']['PostureVector'][0]
-            await channel.default_exchange.publish(
-                aio_pika.Message(
-                    body=msg.encode()
-                ),
-                routing_key=routing_key
+            message = aio_pika.Message(
+                body=msg.encode()
             )
+            await sensor_exchange.publish(message, routing_key="")
             listener.send(json.dumps({'Type': 'QUERY', 'ID': 'JSON_DATA'}))
         # if data['ID'] == 'BINARY_DATA':
             # print(data['Payload']['LocationMatrix'][0])
