@@ -31,7 +31,7 @@ routing_key = "key"
 [connection]
 #MQTT IP for widefind
 broker_ip = "broker-ip"
-broker_port = broker-port
+broker_port = "broker-port"
 blacklist = ['blacklist']
 entrypoint = "entrypoint"
 entrypoint_port = "entrypoint-port"
