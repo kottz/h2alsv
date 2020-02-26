@@ -34,6 +34,9 @@ routing_key = "key"
 #Ip of the connection
 ip = "ip-address"
 
+[logging]
+handlers = ['console', 'rabbitmq']
+
 [vayyar]
 #Room dimensions
 rd = [0.5, 2.6, -4.0, -0.6, 0.8, 2.2]

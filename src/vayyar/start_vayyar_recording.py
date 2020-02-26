@@ -9,16 +9,45 @@ import datetime
 import sys
 import asyncio
 import aio_pika
+import logging
+from python_logging_rabbitmq import RabbitMQHandlerOneWay
 loop = asyncio.get_event_loop()
 
-DTYPES = {0: np.int8,     1: np.uint8,     2: np.int16,     3: np.uint16,
-          4: np.int32,     5: np.uint32,     6: np.float32,     7: np.float64, }
+DTYPES = {0: np.int8,
+        1: np.uint8,
+        2: np.int16,
+        3: np.uint16,
+        4: np.int32,
+        5: np.uint32,
+        6: np.float32,
+        7: np.float64, }
 
 ASCII_RS = '\u001e'
 ASCII_US = '\u001f'
 
 config = toml.load("config_vayyar.toml")
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+if 'console' in config['logging']['handlers']:
+    out_handler = logging.StreamHandler(sys.stdout)
+    out_handler.setLevel(logging.DEBUG)
+    logger.addHandler(out_handler)
+
+if 'rabbitmq' in config['logging']['handlers']:
+    rabbit_handler = RabbitMQHandlerOneWay(
+       host=config['rabbitmq']['host'],
+       username=config['rabbitmq']['username'],
+       password=config['rabbitmq']['password'],
+       connection_params={
+          'virtual_host':config['rabbitmq']['username'],
+          'connection_attempts': 3,
+          'socket_timeout': 5000
+       }
+    )
+    rabbit_handler.setLevel(logging.INFO)
+    logger.addHandler(rabbit_handler)
 
 def to_message(buffer):
     # parse MatNet messages from JSON / own binary format
@@ -45,31 +74,79 @@ def to_message(buffer):
     return msg
 
 
-listener = create_connection("ws://"+config["connection"]["ip"])
+try:
+    listener = create_connection("ws://{}".format(config["connection"]["ip"]))
+except:
+    logger.info("Connection to Vayyar websocket failed. Terminating...")
+    raise
+
 # retrieve current configuration
-listener.send(json.dumps({'Type': 'COMMAND',         'ID': 'SET_PARAMS',         'Payload': {'Cfg.MonitoredRoomDims': config["vayyar"]["rd"], 'Cfg.Common.sensorOrientation.mountPlane': config["vayyar"]["mp"],  'Cfg.Common.sensorOrientation.transVec': config["vayyar"]["tv"], 'Cfg.imgProcessing.substractionMode': config["vayyar"]["ips"], 'Cfg.TargetProperties.MaxPersonsInArena': config["vayyar"]["maxpia"],   'Cfg.TargetProperties.StandingMaxHeight': config["vayyar"]["stamaxh"],  'Cfg.TargetProperties.StandingMinHeight': config["vayyar"]["staminh"],             'Cfg.TargetProperties.SittingMinHeight': config["vayyar"]["lyiminh"],             'Cfg.TargetProperties.LyingMinHeight': config[
-              "vayyar"]["pr"],             'Cfg.TargetProperties.PersonRadius': config["vayyar"]["pr"],             'MPR.save_dir': config["vayyar"]["mprsd"],             'MPR.read_from_file': config["vayyar"]["mprrff"],             'MPR.save_to_file': config["vayyar"]["mprstf"],             'MPR.save_image_to_file': config["vayyar"]["mpsitf"],             'Cfg.OutputData.save_to_file': config["vayyar"]["odstf"],             'Cfg.ExternalGUI.FilterImage.TH': config["vayyar"]["egfi"],             'Cfg.ExternalGUI.FilterImage.numOfSd': config["vayyar"]["egfin"],             'Cfg.PeopleCounter.inCarIsLocked': config["vayyar"]["pcic"],             'Cfg.Zones.Beds': config["vayyar"]["zb"]}}))
-# listener.send(json.dumps({  'Type': 'COMMAND',         'ID': 'SET_PARAMS',         'Payload': { 'Cfg.MonitoredRoomDims': [0.2, 2.6, -4, -0.6, 0.8, 2.2], 'Cfg.Common.sensorOrientation.mountPlane': 'xy',  'Cfg.Common.sensorOrientation.transVec': [0.0, 0.0, 2.4], 'Cfg.imgProcessing.substractionMode': 6.0, 'Cfg.TargetProperties.MaxPersonsInArena': 1.0,   'Cfg.TargetProperties.StandingMaxHeight': 1.7,  'Cfg.TargetProperties.StandingMinHeight': 1.40,             'Cfg.TargetProperties.SittingMinHeight': 0.8,             'Cfg.TargetProperties.LyingMinHeight': 0.2,             'Cfg.TargetProperties.PersonRadius': 0.6,             'MPR.save_dir': '',             'MPR.read_from_file': 0.0,             'MPR.save_to_file': 0.0,             'MPR.save_image_to_file': 0.0,             'Cfg.OutputData.save_to_file': 0.0,             'Cfg.ExternalGUI.FilterImage.TH': 0.0,             'Cfg.ExternalGUI.FilterImage.numOfSd': 5.0,             'Cfg.PeopleCounter.inCarIsLocked': False,             'Cfg.Zones.Beds': None         }     }))
+listener.send(json.dumps(
+    {'Type': 'COMMAND',
+        'ID': 'SET_PARAMS',
+        'Payload': {
+                'Cfg.MonitoredRoomDims': config["vayyar"]["rd"],
+                'Cfg.Common.sensorOrientation.mountPlane': config["vayyar"]["mp"],
+                'Cfg.Common.sensorOrientation.transVec': config["vayyar"]["tv"],
+                'Cfg.imgProcessing.substractionMode': config["vayyar"]["ips"],
+                'Cfg.TargetProperties.MaxPersonsInArena': config["vayyar"]["maxpia"],
+                'Cfg.TargetProperties.StandingMaxHeight': config["vayyar"]["stamaxh"],
+                'Cfg.TargetProperties.StandingMinHeight': config["vayyar"]["staminh"],
+                'Cfg.TargetProperties.SittingMinHeight': config["vayyar"]["lyiminh"],
+                'Cfg.TargetProperties.LyingMinHeight': config["vayyar"]["pr"],
+                'Cfg.TargetProperties.PersonRadius': config["vayyar"]["pr"],
+                'MPR.save_dir': config["vayyar"]["mprsd"],
+                'MPR.read_from_file': config["vayyar"]["mprrff"],
+                'MPR.save_to_file': config["vayyar"]["mprstf"],
+                'MPR.save_image_to_file': config["vayyar"]["mpsitf"],
+                'Cfg.OutputData.save_to_file': config["vayyar"]["odstf"],
+                'Cfg.ExternalGUI.FilterImage.TH': config["vayyar"]["egfi"],
+                'Cfg.ExternalGUI.FilterImage.numOfSd': config["vayyar"]["egfin"],
+                'Cfg.PeopleCounter.inCarIsLocked': config["vayyar"]["pcic"],
+                'Cfg.Zones.Beds': config["vayyar"]["zb"]
+        }
+    }
+))
+
 # set outputs for each frame
-listener.send(json.dumps({'Type': 'COMMAND',         'ID': 'SET_OUTPUTS',         'Payload': {'binary_outputs': [
-              'LocationMatrix', 'NumOfPeople', 'BreathingMatrix'],             'json_outputs': ['PostureVector']}}))
+listener.send(json.dumps(
+    {'Type': 'COMMAND',
+        'ID': 'SET_OUTPUTS',
+        'Payload': {
+            'binary_outputs': ['LocationMatrix', 'NumOfPeople', 'BreathingMatrix'],
+            'json_outputs': ['PostureVector']
+        }
+    }
+))
+
 # start the engine - if WebGUI is not running
 listener.send(json.dumps(
     {'Type': 'COMMAND',         'ID': 'START',         'Payload': {}}))
 listener.send(json.dumps({'Type': 'QUERY', 'ID': 'JSON_DATA'}))
 listener.send(json.dumps({'Type': 'QUERY', 'ID': 'BINARY_DATA'}))
 
-print("Running! Waiting for messages...")
-
+logger.info("Running! Waiting for messages...")
 
 async def send_data():
-    connection = await aio_pika.connect_robust(
-        "amqp://"+config['rabbitmq']['username']+":"+config['rabbitmq']['password']+"@"+config['rabbitmq']['host']+"/"+config['rabbitmq']['username'], loop=loop
-    )
-    channel = await connection.channel()
-    sensor_exchange = await channel.declare_exchange(
-        config['connection']['sensor_exchange'], aio_pika.ExchangeType.FANOUT, durable=True,
-    )
+    try:
+        connection = await aio_pika.connect_robust(
+                "amqp://{}:{}@{}/{}".format(
+                    config['rabbitmq']['username'],
+                    config['rabbitmq']['password'],
+                    config['rabbitmq']['host'],
+                    config['rabbitmq']['username']),
+                loop=loop
+        )
+        channel = await connection.channel()
+        sensor_exchange = await channel.declare_exchange(
+            config['connection']['sensor_exchange'],
+            aio_pika.ExchangeType.FANOUT,
+            durable=True
+        )
+    except:
+        logger.info("Connection to RMQ failed")
+        raise
+    logger.info("Connected to RMQ")
 
     while True:
         await asyncio.sleep(config["asynctimer"]["aast"])
@@ -81,8 +158,14 @@ async def send_data():
             # datetime_object = datetime.datetime.now()
             # print(datetime_object)
             # print(strftime("%H:%M:%S", localtime()))
-            print("PostureVector: ", data['Payload']['PostureVector'][0])
-            msg = "PostureVector: "+data['Payload']['PostureVector'][0]
+            msg = {
+                    'time': datetime.datetime.now().isoformat(),
+                    'event_type': 'data',
+                    'sensor_type': 'vayyar',
+                    'payload': data
+            }
+            logger.DEBUG("sending msg: {}".format(msg))
+            msg = json.dumps(msg) 
             message = aio_pika.Message(
                 body=msg.encode()
             )
