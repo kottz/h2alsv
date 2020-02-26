@@ -13,6 +13,7 @@ class RMQ_Connection:
         self._connection = None
         self._channel = None
         self._queue = None
+        self._exchange = None
         self.buffer = buffer
 
 
@@ -30,9 +31,12 @@ class RMQ_Connection:
         #logger.info("Connecting to RMQ")
         self._connection = await self._create_connection()
         self._channel = await self._connection.channel()
-        self._queue = await self._channel.declare_queue(
-            "test", durable=True, arguments={'x-max-length': 100}
+        self._exchange = await self._channel.declare_exchange(
+        self.config['rabbitmq']['sensor_exchange'], aio_pika.ExchangeType.FANOUT, durable=True
         )
+
+        self._queue = await self._channel.declare_queue(exclusive=True)
+        await self._queue.bind(self._exchange)
         print("connected to RMQ")
 
 
@@ -41,6 +45,7 @@ class RMQ_Connection:
         await self._connection.close()
         self._connection = None
         self._channel = None
+        self._exchange = None
         self._running = False
 
     async def consume(self):

@@ -6,13 +6,30 @@ import logging
 import sys
 import json
 import datetime
+from python_logging_rabbitmq import RabbitMQHandlerOneWay
 
+
+config = toml.load('config.toml')
+
+# Initialize logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 out_handler = logging.StreamHandler(sys.stdout)
-out_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-out_handler.setLevel(logging.INFO)
+out_handler.setLevel(logging.DEBUG)
 logger.addHandler(out_handler)
-logger.setLevel(logging.INFO)
+
+rabbit_handler = RabbitMQHandlerOneWay(
+   host=config['rabbitmq']['host'],
+   username=config['rabbitmq']['username'],
+   password=config['rabbitmq']['password'],
+   connection_params={
+      'virtual_host': config['rabbitmq']['username'],
+      'connection_attempts': 3,
+      'socket_timeout': 5000
+   })
+rabbit_handler.setLevel(logging.INFO)
+logger.addHandler(rabbit_handler)
 
 class Simulator:
     def __init__(self, config, loop):
@@ -21,6 +38,7 @@ class Simulator:
 
         self._connection = None
         self._channel = None
+        self._exchange = None
         self._sim_tasks = []
         self._running = False
 
@@ -40,6 +58,10 @@ class Simulator:
         logger.info("Connecting to RMQ")
         self._connection = await self._create_connection()
         self._channel = await self._connection.channel()
+        
+        self._exchange = await self._channel.declare_exchange(
+            self.config['rabbitmq']['sensor_exchange'], aio_pika.ExchangeType.FANOUT, durable=True
+        )
 
 
     async def disconnect(self):
@@ -47,15 +69,16 @@ class Simulator:
         await self._connection.close()
         self._connection = None
         self._channel = None
+        self._exchange = None
         self._running = False
 
     async def send_message(self, msg, routing_key): 
-        logger.info("Sending message to {}: {}".format(routing_key, msg))
-        await self._channel.default_exchange.publish(
+        logger.debug("Sending message: {}".format(msg))
+        await self._exchange.publish(
                 aio_pika.Message(
                     body=msg.encode()
                     ),
-                routing_key=routing_key)
+                routing_key='')
 
    
 
@@ -66,7 +89,7 @@ class Simulator:
                 await self.send_message(msg, routing_key)
                 await asyncio.sleep(freq+random.uniform(-rand_var,rand_var))
         except asyncio.CancelledError:
-            logger.info("{} sender was stopped".format(msg))
+            logger.info("{} sender was stopped".format(msg_func.__name__))
 
     def run_simulation(self, freq=5):
         if self._connection == None:
@@ -122,6 +145,7 @@ class Simulator:
         pos_vec = ["Standing", "Sitting", "Walking"]
         json_msg = {
             "time": str(cur_time),
+            "event_type": "data",
             "sensor_type": "vayyar",
             "data": {
                 "posture_vector": random.choice(pos_vec),
@@ -136,6 +160,7 @@ class Simulator:
         cur_time = datetime.datetime.now().time()
         json_msg = {
             "time": str(cur_time),
+            "event_type": "data",
             "sensor_type": "widefind",
             "data": {
                 "x_coordinate": random.randint(1,30),
@@ -149,6 +174,7 @@ class Simulator:
         cur_time = datetime.datetime.now().time()
         json_msg = {
             "time": str(cur_time),
+            "event_type": "data",
             "sensor_type": "zwave",
             "data": {
                 "cabinet_1": bool(random.getrandbits(1)),
@@ -166,13 +192,12 @@ class Simulator:
 async def main(loop):
     config = toml.load('config.toml') 
     sim = Simulator(config, loop)
-    sim.get_vayyar_data()
-    #await asyncio.sleep(20)
     await sim.connect()
     sim.run_simulation()
-    await asyncio.sleep(20) #Running for 20 sec just to test
+    await asyncio.sleep(20) #Run sim for 20 sec
     sim.stop_simulation()
     await sim.disconnect()
+    await asyncio.sleep(2) #Let logger finish before terminating
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
