@@ -44,12 +44,11 @@ def init_connection():
         channel = connection.channel()
         # exchange implementation
         channel.exchange_declare(
-            exchange="sensor_data", durable=True, exchange_type="fanout")
+            exchange=config['rabbitmq']['sensor_exchange'], durable=True, exchange_type=config['rabbitmq']['exchange_type'])
         result = channel.queue_declare(queue='', exclusive=True)
         queue_name = result.method.queue
         channel.queue_bind(
-            exchange="sensor_data", queue=queue_name)
-
+            exchange=config['rabbitmq']['sensor_exchange'], queue=queue_name)
         channel.basic_consume(
             queue=queue_name, on_message_callback=callback, auto_ack=True)
         print(' [*] Waiting for messages. To exit press CTRL+C')
