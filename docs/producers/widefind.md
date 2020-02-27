@@ -2,7 +2,7 @@
 <!--
 Text here
 -->
-The WideFind producer script collects the sensor data from a paho MQTT broker. The data will be converted as `JSON` and before being sent to the RabbitMQ server. All the configuration is done by an external `toml` config. Lastly the module is coded in `python` and is fully `asyncio` based.
+The WideFind producer script collects the sensor data from a paho MQTT broker. The data will be converted as `JSON` and before being sent to the RabbitMQ server. All the configuration is done by an external `toml` config. Lastly the module is coded in `python` and uses threading.
 
 ## Starting the WideFind module
 
