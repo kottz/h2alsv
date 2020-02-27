@@ -39,5 +39,5 @@ type = "type"
 label = "label"
 
 [token]
-expiration_time = expiration time
+expiration_time = 3000
 ```
