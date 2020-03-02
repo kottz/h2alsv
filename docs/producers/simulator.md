@@ -66,18 +66,16 @@ The config file is structured as the example below.
 username = "my_username"
 password = "my_password"
 host = "my_host"
+sensor_exchange = "sensor_data"
 
 [vayyar]
 enabled = true
-queue = "name_of_vayyar_queue" # Name of RMQ queue
 
 [widefind]
 enabled = false
-queue = "name_of_widefind_queue"
 
 [zwave]
 enabled = true
-queue = "name_of_zwave_queue"
 ```
 
 ## Current Limitations

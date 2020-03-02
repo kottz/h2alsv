@@ -26,6 +26,7 @@ The config file is structured as the example below.
 username = "my_username"
 password = "my_password"
 host = "my_host"
+sensor_exchange = "sensor_data"
 
 [websocket]
 ip = "0.0.0.0"
@@ -36,3 +37,4 @@ port = 3030
 
 - Better queue management configuration possibilites will be added.
 - Proper exception handling is not yet in place.
+- Logging
