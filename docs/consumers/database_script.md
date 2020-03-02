@@ -1,4 +1,4 @@
-# Database script
+# Database Script
 The database script is a consumer which sends the sensor data from the RabbitMQ server to the database. The script is using `Data Aggregator module` that implements the database APIs. The script also has an external `toml` config where you can change the connection and which data to forward to the database.
 
 ## Starting the database script
