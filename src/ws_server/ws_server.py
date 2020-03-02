@@ -61,7 +61,7 @@ class RMQ_Connection:
         return self._queue.iterator()
 
 
-class ws_server:
+class WS_Server:
     def __init__(self, config, buffer):
         self.config = config['websocket']
         self.connected = set()
@@ -86,55 +86,29 @@ class ws_server:
             print("removed ws from connected")
             self.connected.remove(websocket)
 
-    #async def broadcast_test(self):
-    #    while True:
-    #        await asyncio.sleep(2)
-    #        if len(self.connected) > 0:
-    #            await asyncio.wait([ws.send("Hello!"+str(random.randint(1,10))) for ws in self.connected])
-
     async def broadcast(self):
         while True:
             msg = await self.buffer.get()
             if len(self.connected) > 0:
                 await asyncio.wait([ws.send(msg) for ws in self.connected])          
 
-    #async def broadcast(self, msg):
-    #    if len(self.connected) > 0:
-     #       await asyncio.wait([ws.send(msg) for ws in self.connected])
-
     def start(self):
-        #asyncio.get_event_loop().run_until_complete(self.server)
         asyncio.ensure_future(self.server)
-        
-            
 
-#start_server = websockets.serve(handler, "localhost", 3030)
-
-#asyncio.get_event_loop().run_until_complete(start_server)
 
 async def main():
     config = toml.load("config.toml")
-
     buffer = asyncio.Queue(maxsize=10)
 
     rmq = RMQ_Connection(config, buffer)
     await rmq.connect()
     
-    wss = ws_server(config, buffer)
+    wss = WS_Server(config, buffer)
     wss.start()
 
     asyncio.create_task(rmq.consume())
     asyncio.create_task(wss.broadcast())
 
-
-#wss = ws_server()
-#wss.start()
-#print("kommer hit")
-#asyncio.ensure_future(wss.broadcast())
-#print("kommer hit också")
-#asyncio.get_event_loop().run_forever()
-
 if __name__ == "__main__":
-
     asyncio.get_event_loop().run_until_complete(main())
     asyncio.get_event_loop().run_forever()
