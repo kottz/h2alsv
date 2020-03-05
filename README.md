@@ -2,7 +2,7 @@
   <p>
     <h1>
       <a href="https://github.com/kottz/h2alsv">
-        <img src="/img/h2alsv_logo.svg" alt="h2alsv" height="150"/>
+        <img src="docs/img/h2alsv_logo.svg" alt="h2alsv" height="150"/>
       </a>
       <br />
       Human Health and Activity Lab Sensor Visualization
