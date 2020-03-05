@@ -164,7 +164,7 @@ async def send_data():
                     'sensor_type': 'vayyar',
                     'payload': data
             }
-            logger.DEBUG("sending msg: {}".format(msg))
+            logger.debug("sending msg: {}".format(msg))
             msg = json.dumps(msg) 
             message = aio_pika.Message(
                 body=msg.encode()
