@@ -8,7 +8,8 @@ outlines some basic principles relevant to h2alsv.
 If possible, new python modules should be `asyncio` based with `async/await`
 syntax. All modules use separate configuration files written in TOML. 
 
-Follow the h2alsv JSON specification for sending sensor data and logs.
+Follow the h2alsv JSON [specification](general/h2alsv_protocol.md) for sending
+sensor data and logs.
 
 ## Dependencies
 

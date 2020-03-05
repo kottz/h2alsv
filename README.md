@@ -1,4 +1,16 @@
-# Human Health and Activity Lab Sensor Visualization
+<div align="center">
+  <p>
+    <h1>
+      <a href="https://github.com/kottz/h2alsv">
+        <img src="/img/h2alsv_logo.svg" alt="h2alsv" height="150"/>
+      </a>
+      <br />
+      Human Health and Activity Lab Sensor Visualization
+    </h1>
+    <br />
+  </p>
+</div>
+
 Real-time Visualization of Sensor Data in the Human Health and Activity Lab at
 Lulea University of Technology.
 
