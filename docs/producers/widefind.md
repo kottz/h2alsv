@@ -40,3 +40,13 @@ entrypoint_port = "entrypoint-port"
 #Await asyncio sleep time
 aast = 1
 ```
+
+## Payload specification
+The WideFind sensor has two kinds of payloads, beacons and reports. Down below you can see an example of each payload.
+
+```javascript
+{'host': 'WFGATEWAY-3ABFF8D01EFF', 'message': 'BEACON:4F7A62635F6A32A9,0.2.7,600,-1600,2700,4.00,-82.5,1017847,MAN,SAT*96AD', 'source': '03FF5C0A2BFA3A9B', 'time': '2020-03-05T09:16:00.928516652Z', 'type': 'widefind_message'}
+
+
+{'host': 'WFGATEWAY-3ABFF8D01EFF', 'message': 'REPORT:AD9C473EACA8830B,0.2.7,4206,-1135,15,0,0,0,3.83,-83.57,811922*519A', 'source': '03FF5C0A2BFA3A9B', 'time': '2020-03-05T09:16:01.408602778Z', 'type': 'widefind_message'}
+```
