@@ -5,6 +5,7 @@
   grid-template-areas:
     "header"
     "content"
+    "map"
     "footer";
 
   grid-template-columns: 1fr;
