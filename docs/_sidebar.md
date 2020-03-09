@@ -17,6 +17,7 @@
   - [ws server](consumers/ws_server.md)
   - [Web app](consumers/web_ui.md)
   - [DB aggregator](consumers/database_script.md)
+  - [Log Reader](consumers/log_reader.md)
 
 - [GitHub](https://github.com/kottz/h2alsv/)
 - [H2Al Paper](http://ltu.diva-portal.org/smash/record.jsf?pid=diva2:1290940)
