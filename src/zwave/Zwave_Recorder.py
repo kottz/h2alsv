@@ -17,13 +17,6 @@ from json.encoder import JSONEncoder
 loop = asyncio.get_event_loop()
 
 config = toml.load("config.toml")
-'''
-logger = logging.getLogger(__name__)
-out_handler = logging.StreamHandler(sys.stdout)
-out_handler.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
-out_handler.setLevel(logging.INFO)
-logger.addHandler(out_handler)
-logger.setLevel(logging.INFO)'''
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -35,6 +28,7 @@ if 'console' in config['logging']['handlers']:
 
 if 'rabbitmq' in config['logging']['handlers']:
     rabbit_handler = RabbitMQHandlerOneWay(
+    
        host=config['rabbitmq']['host'],
        username=config['rabbitmq']['username'],
        password=config['rabbitmq']['password'],
@@ -90,8 +84,7 @@ async def heartbeat(connection):
         await asyncio.sleep(10)
         logger.info("sending Heartbeat")
         await send_data("ok", "", connection, channel, "heartbeat")
-        await sendLog(connection,channelLog)
-
+       
 async def get_state(item, numb, connection):
     channel = await connection.channel()
     while True:
@@ -119,14 +112,6 @@ async def send_data(msg, numb, connection, channel,datatype):
     await sensor_data.publish(aio_pika.Message(
         body=msgJson.encode()), routing_key="")
     logger.info("Data Sent" + msgJson)
-
-async def sendLog(connection, channelLog):
-    log_data = await channelLog.declare_exchange(
-        config['connection']['log_exchange'], aio_pika.ExchangeType.TOPIC, durable=True,)
-    logJson = json.dumps({'Time': datetime.datetime.now().isoformat(),
-     'Eventtype': "Log", 'SensorType': "Zwave", 'Payload':logger.addHandler(rabbit_handler)} )
-    await log_data.publish(aio_pika.Message(
-        body=logJson.encode()), routing_key="")
 
 async def main():
     logger.info("creating connection")
