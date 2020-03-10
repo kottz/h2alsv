@@ -55,22 +55,21 @@ def to_message(buffer):
         return json.loads(buffer)
     seek = 0
     # bufferSize = np.asscalar(np.frombuffer(buffer, np.int32, 1, seek))
-    fields_len = np.asscalar(np.frombuffer(buffer, np.int32, 1, seek + 4))
+    fields_len = np.frombuffer(buffer, np.int32, 1, seek + 4).item()
     header_buff = buffer[seek + 8: seek + 8 + fields_len].decode('utf8')
     id, keys = header_buff.split(ASCII_RS)
     msg = {'ID': id, 'Payload': {}}
     seek += 8 + fields_len
     for key in keys.split(ASCII_US):
         # fieldSize = np.asscalar(np.frombuffer(buffer, np.int32, 1, seek))
-        dtype = DTYPES[np.asscalar(
-            np.frombuffer(buffer, np.int32, 1, seek + 4))]
-        ndims = np.asscalar(np.frombuffer(buffer, np.int32, 1, seek + 8))
+        dtype = DTYPES[np.frombuffer(buffer, np.int32, 1, seek + 4).item()]
+        ndims = np.frombuffer(buffer, np.int32, 1, seek + 8).item()
         dims = np.frombuffer(buffer, np.int32, ndims, seek + 12)
         seek += 12 + ndims * np.int32().nbytes
         data = np.frombuffer(buffer, dtype, np.prod(dims), seek)
         seek += np.prod(dims) * dtype().nbytes
         msg['Payload'][key] = data.reshape(
-            dims) if ndims else np.asscalar(data)
+            dims) if ndims else data.item()
     return msg
 
 
@@ -152,12 +151,7 @@ async def send_data():
         await asyncio.sleep(config["asynctimer"]["aast"])
         buffer = listener.recv()
         data = to_message(buffer)
-        # print(data['ID'])
-        # print(data)
         if data['ID'] == 'JSON_DATA':
-            # datetime_object = datetime.datetime.now()
-            # print(datetime_object)
-            # print(strftime("%H:%M:%S", localtime()))
             msg = {
                     'time': datetime.datetime.now().isoformat(),
                     'event_type': 'data',
@@ -171,10 +165,32 @@ async def send_data():
             )
             await sensor_exchange.publish(message, routing_key="")
             listener.send(json.dumps({'Type': 'QUERY', 'ID': 'JSON_DATA'}))
-        # if data['ID'] == 'BINARY_DATA':
-            # print(data['Payload']['LocationMatrix'][0])
-            # listener.send(json.dumps({'Type': 'QUERY', 'ID': 'BINARY_DATA'}))
-        # time.sleep(2)
+
+        if data['ID'] == 'BINARY_DATA':
+            a = data['Payload']['LocationMatrix']
+            a = a[~np.isnan(a).any(axis=1)]
+            a = a.tolist()
+            data['Payload']['LocationMatrix'] = a
+
+            b = data['Payload']['BreathingMatrix']
+            b = b[~np.isnan(b).any(axis=1)]
+            b = b.tolist()
+            data['Payload']['BreathingMatrix'] = b
+
+            msg = {
+                    'time': datetime.datetime.now().isoformat(),
+                    'event_type': 'data',
+                    'sensor_type': 'vayyar',
+                    'payload': data
+            }
+            logger.debug("sending msg: {}".format(msg))
+            msg = json.dumps(msg)
+            message = aio_pika.Message(
+                body=msg.encode()
+            )
+            await sensor_exchange.publish(message, routing_key="")
+            listener.send(json.dumps({'Type': 'QUERY', 'ID': 'BINARY_DATA'}))
+            
 
 if __name__ == '__main__':
     loop.run_until_complete(send_data())
