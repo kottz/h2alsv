@@ -5,6 +5,15 @@ import { ReactComponent as H2alsvMap } from './../h2alsv_map.svg';
 import { ReactComponent as UserIcon } from './../user_icon.svg';
 
 function getCoordinates(x, y) {
+    let x_cord = 20*x;
+    x_cord = x_cord.toString()+'%';
+    let y_cord = 20*y;
+    y_cord = y_cord.toString()+'%';
+    console.log(x_cord, y_cord);
+    return [x_cord, y_cord];
+}
+
+function getCoordinatesTest(x, y) {
     let x_cord = 20*x*Math.random();
     x_cord = x_cord.toString()+'%';
     let y_cord = 20*x*Math.random();
@@ -24,7 +33,7 @@ export class Map extends React.Component {
     }
 
     handlerClick() {
-        let coords = getCoordinates(2, 3);
+        let coords = getCoordinatesTest(2, 3);
         console.log(coords);
         this.setState(state => ({
             userIconTop: coords[1],

@@ -10,10 +10,8 @@ import './App.css';
 function App() {
   return (    
     <div className="App">
-      <Map />
       <Header />
       <SensorDisplay />
-      
       <Footer />
     </div>
   );
