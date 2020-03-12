@@ -1,5 +1,5 @@
 # Log Reader 
-This module provides is reads logs from the log exchange in real-time.
+This module reads logs from the log exchange in real-time.
 It is intentionally kept basic since a proper logging platform (ELK,
 Graylog etc.) will be deployed in the future.
 
