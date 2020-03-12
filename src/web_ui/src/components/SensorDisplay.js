@@ -7,9 +7,9 @@ import { SensorStatus } from './SensorStatus';
 import './SensorDisplay.css';
 
 function getMapCoordinates(x, y) {
-    let x_cord = 20*x;
+    let x_cord = 25-8.82*x;
     x_cord = x_cord.toString()+'%';
-    let y_cord = 20*y;
+    let y_cord = 48+10.645*y;
     y_cord = y_cord.toString()+'%';
     console.log(x_cord, y_cord);
     return [x_cord, y_cord];
@@ -30,9 +30,13 @@ export class SensorDisplay extends React.Component {
             const json_msg = JSON.parse(msg.data);
             this.setState({[json_msg.sensor_type]: JSON.stringify(json_msg, null, 2)});
             if( json_msg.sensor_type === "vayyar" && json_msg.payload.ID === "BINARY_DATA") {
-                let loc_matrix = json_msg.payload.Payload.LocationMatrix[0];
-                let mapCoordinates = getMapCoordinates(loc_matrix[0], loc_matrix[1]);
-                this.setState({vayyar_location_matrix: mapCoordinates});
+                console.log(json_msg.payload.Payload.LocationMatrix.length)
+                if (json_msg.payload.Payload.LocationMatrix.length != 0) {
+                    let loc_matrix = json_msg.payload.Payload.LocationMatrix[0];
+                    console.log(loc_matrix)
+                    let mapCoordinates = getMapCoordinates(loc_matrix[0], loc_matrix[1]);
+                    this.setState({vayyar_location_matrix: mapCoordinates});
+                }
             }
         }
     }

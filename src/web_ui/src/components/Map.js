@@ -44,11 +44,10 @@ export class Map extends React.Component {
     render() {
         return (
             <div className="map">
-                <p> hej</p>
-                <button onClick={this.handlerClick}>yoy</button>
+                <h2>Map</h2>
                 <div className="map-wrapper">
                     <H2alsvMap />
-                    <UserIcon id="user_icon" className="userIcon" style={{top: this.state.userIconTop, left: this.state.userIconLeft}}/>
+                    <UserIcon id="user_icon" className="userIcon" style={{top: this.props.vayyar_location_matrix[1], left: this.props.vayyar_location_matrix[0]}}/>
                 </div>
             </div>
         );
