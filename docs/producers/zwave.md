@@ -60,4 +60,5 @@ b'{"Time": "2020-03-05T11:05:36.612332", "Eventtype": "data", "SensorType": "Zwa
 b'{"Time": "2020-03-05T11:05:18.474249", "Eventtype": "data", "SensorType": "Zwave", "Payload": "none22"}'
 b'{"Time": "2020-03-05T11:05:18.465173", "Eventtype": "data", "SensorType": "Zwave", "Payload": "CLOSED16"}'
 b'{"Time": "2020-03-05T11:05:29.989320", "Eventtype": "heartbeat", "SensorType": "Zwave", "Payload": "ok"}'
-´´´
+
+```
