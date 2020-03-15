@@ -54,7 +54,7 @@ handlers = ['....', '....']
 ## Payload specification
 Zwave has four diffrent kinds of payloads, the open/closed events that occur and a heartbeat. When you start the Zwave_recorder it also checks all the available sensors and returns none if the sensor is unavilable.
 
-´´´javascript
+```javascript
 
 b'{"Time": "2020-03-05T11:05:36.612332", "Eventtype": "data", "SensorType": "Zwave", "Payload": "OPEN3"}'
 b'{"Time": "2020-03-05T11:05:18.474249", "Eventtype": "data", "SensorType": "Zwave", "Payload": "none22"}'
